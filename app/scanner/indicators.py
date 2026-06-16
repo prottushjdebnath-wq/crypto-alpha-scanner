@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def trend_score(df):
 
     ema50 = df["close"].ewm(span=50).mean()
@@ -13,7 +14,16 @@ def volume_score(df):
     avg_volume = df["volume"].tail(50).mean()
     current_volume = df["volume"].iloc[-1]
 
-    return 100 if current_volume > avg_volume * 1.5 else 50
+    if current_volume > avg_volume * 3:
+        return 100
+
+    if current_volume > avg_volume * 2:
+        return 90
+
+    if current_volume > avg_volume * 1.5:
+        return 80
+
+    return 40
 
 
 def momentum_score(df):
@@ -24,8 +34,11 @@ def momentum_score(df):
         df["close"].iloc[-20]
     ) / df["close"].iloc[-20]
 
-    if change > 0.05:
+    if change > 0.10:
         return 100
+
+    if change > 0.05:
+        return 90
 
     if change > 0:
         return 70
@@ -36,8 +49,7 @@ def momentum_score(df):
 def liquidity_score(df):
 
     avg_dollar_volume = (
-        df["close"] *
-        df["volume"]
+        df["close"] * df["volume"]
     ).tail(50).mean()
 
     if avg_dollar_volume > 50000000:
@@ -51,4 +63,24 @@ def liquidity_score(df):
 
 def relative_strength_score(df):
 
-    return 80
+    close = df["close"]
+
+    if len(close) < 30:
+        return 50
+
+    rs = (
+        close.iloc[-1]
+        /
+        close.iloc[-30]
+    )
+
+    if rs > 1.20:
+        return 100
+
+    if rs > 1.10:
+        return 90
+
+    if rs > 1.00:
+        return 75
+
+    return 40
