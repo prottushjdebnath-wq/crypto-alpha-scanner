@@ -53,14 +53,6 @@ async def main():
 
             results.append(signal)
 
-            tracker.record(
-                signal["symbol"],
-                "LONG",
-                signal["score"],
-                signal["entry"],
-                signal["sl"],
-                signal["tp1"]
-            )
 
         except Exception as e:
             print(symbol, e)
@@ -86,6 +78,15 @@ async def main():
             f"TP3: {item['tp3']}\n"
             f"RR: {item['rr']}\n\n"
         )
+        tracker.record(
+            item["symbol"],
+            "LONG",
+            item["score"],
+            item["entry"],
+            item["sl"],
+            item["tp1"]
+        )
+
 
     print(message)
 
