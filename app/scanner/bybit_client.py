@@ -1,5 +1,6 @@
 import ccxt
 
+
 class BybitClient:
 
     def __init__(self):
@@ -26,16 +27,32 @@ class BybitClient:
 
         pairs = []
 
+        blacklist = [
+            "AAPL",
+            "TSLA",
+            "NVDA",
+            "META",
+            "GOOG",
+            "MSFT",
+            "AMZN",
+            "AAOI"
+        ]
+
         for symbol, market in markets.items():
 
             try:
 
-                if (
+                if not (
                     market.get("active")
                     and market.get("swap")
                     and market.get("quote") == "USDT"
                 ):
-                    pairs.append(symbol)
+                    continue
+
+                if any(x in symbol for x in blacklist):
+                    continue
+
+                pairs.append(symbol)
 
             except:
                 pass
