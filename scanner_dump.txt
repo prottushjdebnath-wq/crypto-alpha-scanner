@@ -1,0 +1,139 @@
+===== run_scanner.py =====
+import asyncio
+
+from app.scanner.bybit_client import BybitClient
+from app.scanner.signal_engine import SignalEngine
+from app.telegram.notifier import TelegramNotifier
+from app.config.settings import BOT_TOKEN, CHAT_ID
+
+PAIRS = [
+    "BTC/USDT:USDT",
+    "ETH/USDT:USDT",
+    "SOL/USDT:USDT",
+    "SUI/USDT:USDT",
+    "DOGE/USDT:USDT",
+    "APT/USDT:USDT"
+]
+
+async def main():
+
+    client = BybitClient()
+    engine = SignalEngine()
+    notifier = TelegramNotifier(BOT_TOKEN)
+
+    results = []
+
+    for symbol in PAIRS:
+
+        try:
+            ohlcv = client.get_ohlcv(
+                symbol,
+                timeframe="1h",
+                limit=250
+            )
+
+            signal = engine.evaluate(
+                symbol,
+                ohlcv
+            )
+
+            results.append(signal)
+
+        except Exception as e:
+            print(symbol, e)
+
+    results.sort(
+        key=lambda x: x["score"],
+        reverse=True
+    )
+
+    message = "🔥 TOP SCANNER RESULTS\n\n"
+
+    for i, item in enumerate(results[:5], start=1):
+        message += (
+            f"{i}. {item['symbol']}\n"
+            f"Score: {item['score']}\n\n"
+        )
+
+    print(message)
+
+    await notifier.send(
+        CHAT_ID,
+        message
+    )
+
+asyncio.run(main())
+
+===== bybit_client.py =====
+import ccxt
+
+class BybitClient:
+    def __init__(self):
+        self.exchange = ccxt.bybit({
+            "enableRateLimit": True
+        })
+
+    def get_ticker(self, symbol):
+        return self.exchange.fetch_ticker(symbol)
+
+    def get_ohlcv(self, symbol, timeframe="1h", limit=250):
+        return self.exchange.fetch_ohlcv(
+            symbol,
+            timeframe=timeframe,
+            limit=limit
+        )
+
+    def get_markets(self):
+        return self.exchange.load_markets()
+
+===== signal_engine.py =====
+import pandas as pd
+
+from app.scanner.indicators import (
+    trend_score,
+    volume_score
+)
+
+from app.scanner.scoring import calculate_score
+
+class SignalEngine:
+
+    def evaluate(self, symbol, ohlcv):
+
+        df = pd.DataFrame(
+            ohlcv,
+            columns=[
+                "timestamp",
+                "open",
+                "high",
+                "low",
+                "close",
+                "volume"
+            ]
+        )
+
+        trend = trend_score(df)
+        volume = volume_score(df)
+
+        score = calculate_score(
+            trend,
+            volume,
+            30
+        )
+
+        return {
+            "symbol": symbol,
+            "score": score
+        }
+
+===== scoring.py =====
+def calculate_score(
+    trend_points,
+    volume_points,
+    relative_strength_points
+):
+    return (
+        trend_points +
+        volume_points +
+        relative_strength_points
+    )

@@ -5,14 +5,6 @@ from app.scanner.signal_engine import SignalEngine
 from app.telegram.notifier import TelegramNotifier
 from app.config.settings import BOT_TOKEN, CHAT_ID
 
-PAIRS = [
-    "BTC/USDT:USDT",
-    "ETH/USDT:USDT",
-    "SOL/USDT:USDT",
-    "SUI/USDT:USDT",
-    "DOGE/USDT:USDT",
-    "APT/USDT:USDT"
-]
 
 async def main():
 
@@ -20,11 +12,32 @@ async def main():
     engine = SignalEngine()
     notifier = TelegramNotifier(BOT_TOKEN)
 
-    results = []
+    markets = client.get_markets()
 
-    for symbol in PAIRS:
+    pairs = []
+
+    for symbol, market in markets.items():
 
         try:
+
+            if (
+                market.get("active")
+                and market.get("swap")
+                and market.get("quote") == "USDT"
+            ):
+                pairs.append(symbol)
+
+        except:
+            pass
+
+    print(f"Scanning {len(pairs)} futures pairs")
+
+    results = []
+
+    for symbol in pairs[:100]:
+
+        try:
+
             ohlcv = client.get_ohlcv(
                 symbol,
                 timeframe="1h",
@@ -46,12 +59,21 @@ async def main():
         reverse=True
     )
 
-    message = "🔥 TOP SCANNER RESULTS\n\n"
+    top = results[:10]
 
-    for i, item in enumerate(results[:5], start=1):
+    message = "🚀 TOP FUTURES OPPORTUNITIES\n\n"
+
+    for i, item in enumerate(top, start=1):
+
         message += (
-            f"{i}. {item['symbol']}\n"
-            f"Score: {item['score']}\n\n"
+            f"#{i} {item['symbol']}\n"
+            f"Score: {item['score']}\n"
+            f"Entry: {item['entry']}\n"
+            f"SL: {item['sl']}\n"
+            f"TP1: {item['tp1']}\n"
+            f"TP2: {item['tp2']}\n"
+            f"TP3: {item['tp3']}\n"
+            f"RR: {item['rr']}\n\n"
         )
 
     print(message)
@@ -60,5 +82,6 @@ async def main():
         CHAT_ID,
         message
     )
+
 
 asyncio.run(main())

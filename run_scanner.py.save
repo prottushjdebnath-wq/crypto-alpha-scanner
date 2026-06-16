@@ -1,0 +1,52 @@
+client = BybitClient()
+engine = SignalEngine()
+notifier = TelegramNotifier(BOT_TOKEN)
+
+pairs = client.get_top_futures(100)
+
+print(f"Scanning {len(pairs)} futures pairs")
+
+results = []
+
+for symbol in pairs:
+
+    try:
+
+        ohlcv = client.get_ohlcv(
+            symbol,
+            timeframe="1h",
+            limit=250
+        )
+
+        signal = engine.evaluate(
+            symbol,
+            ohlcv
+        )
+
+        results.append(signal)
+
+    except Exception as e:
+        print(symbol, e)
+
+results.sort(
+    key=lambda x: x["score"],
+    reverse=True
+)
+
+top = results[:10]
+
+message = "🚀 TOP FUTURES OPPORTUNITIES\n\n"
+
+for i, item in enumerate(top, start=1):
+
+    message += (
+        f"{i}. {item['symbol']}\n"
+        f"Score: {item['score']}\n\n"
+    )
+
+print(message)
+
+await notifier.send(
+    CHAT_ID,
+    message
+)

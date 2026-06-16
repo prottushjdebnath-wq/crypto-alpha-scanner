@@ -8,13 +8,17 @@ from app.scanner.indicators import (
     relative_strength_score
 )
 
-from app.scanner.scoring import calculate_score
-from app.risk.trade_plan import build_trade_plan
-
+from app.scanner.scoring import (
+    calculate_score
+)
 
 class SignalEngine:
 
-    def evaluate(self, symbol, ohlcv):
+    def evaluate(
+        self,
+        symbol,
+        ohlcv
+    ):
 
         df = pd.DataFrame(
             ohlcv,
@@ -42,19 +46,11 @@ class SignalEngine:
             momentum
         )
 
-        plan = build_trade_plan(df)
-
         return {
             "symbol": symbol,
             "score": score,
             "trend": trend,
             "volume": volume,
             "momentum": momentum,
-            "liquidity": liquidity,
-            "entry": plan["entry"],
-            "sl": plan["sl"],
-            "tp1": plan["tp1"],
-            "tp2": plan["tp2"],
-            "tp3": plan["tp3"],
-            "rr": plan["rr"]
-        }
+            "liquidity": liquidity
+
