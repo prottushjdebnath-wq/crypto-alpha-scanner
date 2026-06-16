@@ -8,7 +8,11 @@ from app.scanner.indicators import (
     relative_strength_score
 )
 
-from app.scanner.scoring import calculate_score
+from app.scanner.scoring import (
+    calculate_score,
+    confidence
+)
+
 from app.risk.trade_plan import build_trade_plan
 
 
@@ -42,11 +46,14 @@ class SignalEngine:
             momentum
         )
 
+        conf = confidence(score)
+
         plan = build_trade_plan(df)
 
         return {
             "symbol": symbol,
             "score": score,
+            "confidence": conf,
             "trend": trend,
             "volume": volume,
             "momentum": momentum,
