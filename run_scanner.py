@@ -6,7 +6,6 @@ from app.telegram.notifier import TelegramNotifier
 from app.paper.tracker import PaperTracker
 from app.config.settings import BOT_TOKEN, CHAT_ID
 
-
 async def main():
 
     client = BybitClient()
@@ -77,6 +76,5 @@ async def main():
         CHAT_ID,
         message
     )
-
 
 asyncio.run(main())
