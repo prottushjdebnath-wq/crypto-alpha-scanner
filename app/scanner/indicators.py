@@ -68,11 +68,7 @@ def relative_strength_score(df):
     if len(close) < 30:
         return 50
 
-    rs = (
-        close.iloc[-1]
-        /
-        close.iloc[-30]
-    )
+    rs = close.iloc[-1] / close.iloc[-30]
 
     if rs > 1.20:
         return 100
