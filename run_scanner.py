@@ -14,23 +14,7 @@ async def main():
     notifier = TelegramNotifier(BOT_TOKEN)
     tracker = PaperTracker()
 
-    markets = client.get_markets()
-
-    pairs = []
-
-    for symbol, market in markets.items():
-
-        try:
-
-            if (
-                market.get("active")
-                and market.get("swap")
-                and market.get("quote") == "USDT"
-            ):
-                pairs.append(symbol)
-
-        except:
-            pass
+    pairs = client.get_top_futures(300)
 
     print(f"Scanning {len(pairs)} futures pairs")
 
