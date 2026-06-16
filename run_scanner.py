@@ -3,6 +3,7 @@ import asyncio
 from app.scanner.bybit_client import BybitClient
 from app.scanner.signal_engine import SignalEngine
 from app.telegram.notifier import TelegramNotifier
+from app.paper.tracker import PaperTracker
 from app.config.settings import BOT_TOKEN, CHAT_ID
 
 
@@ -11,6 +12,7 @@ async def main():
     client = BybitClient()
     engine = SignalEngine()
     notifier = TelegramNotifier(BOT_TOKEN)
+    tracker = PaperTracker()
 
     markets = client.get_markets()
 
@@ -50,6 +52,15 @@ async def main():
             )
 
             results.append(signal)
+
+            tracker.record(
+                signal["symbol"],
+                "LONG",
+                signal["score"],
+                signal["entry"],
+                signal["sl"],
+                signal["tp1"]
+            )
 
         except Exception as e:
             print(symbol, e)
