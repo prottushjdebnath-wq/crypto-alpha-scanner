@@ -14,17 +14,11 @@ from app.scanner.scoring import (
 )
 
 from app.risk.trade_plan import build_trade_plan
-from app.scanner.btc_filter import btc_bullish
 
 
 class SignalEngine:
 
-    def evaluate(
-        self,
-        symbol,
-        ohlcv,
-        btc_ohlcv=None
-    ):
+    def evaluate(self, symbol, ohlcv):
 
         df = pd.DataFrame(
             ohlcv,
@@ -51,10 +45,6 @@ class SignalEngine:
             liquidity,
             momentum
         )
-
-        if btc_ohlcv is not None:
-            if not btc_bullish(btc_ohlcv):
-                score -= 20
 
         conf = confidence(score)
 

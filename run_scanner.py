@@ -10,6 +10,11 @@ from app.config.settings import BOT_TOKEN, CHAT_ID
 async def main():
 
     client = BybitClient()
+    btc_ohlcv = client.get_ohlcv(
+        "BTC/USDT:USDT",
+        timeframe="1h",
+        limit=250
+    )
     engine = SignalEngine()
     notifier = TelegramNotifier(BOT_TOKEN)
     tracker = PaperTracker()
