@@ -4,6 +4,7 @@ from app.scanner.bybit_client import BybitClient
 from app.scanner.signal_engine import SignalEngine
 from app.telegram.notifier import TelegramNotifier
 from app.paper.tracker import PaperTracker
+from app.paper.outcome_checker import OutcomeChecker
 from app.config.settings import BOT_TOKEN, CHAT_ID
 
 async def main():
@@ -12,6 +13,7 @@ async def main():
     engine = SignalEngine()
     notifier = TelegramNotifier(BOT_TOKEN)
     tracker = PaperTracker()
+    OutcomeChecker().run()
 
     pairs = client.get_top_futures(300)
 
