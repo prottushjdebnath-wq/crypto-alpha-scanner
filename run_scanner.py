@@ -19,7 +19,7 @@ async def main():
 
     results = []
 
-    for symbol in pairs[:100]:
+    for symbol in pairs[:300]:
 
         try:
 
